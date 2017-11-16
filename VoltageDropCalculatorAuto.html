@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Voltage Drop Calculator - Aaron Hesse, PE, RCDD</title>
+		<style>
+			body {
+				font-family: Arial, San-serif;
+				font-size: small;
+				color: Black ;
+				background-color:white ;
+				text-align: left;
+			}
+		</style>
+
+	</head>
+	<body>
+		<h2>Voltage Drop Calculator</h2>
+		<h4>By Aaron Hesse, PE, RCDD</h4>
+		
+		<p>Power Factor: <input type="text" id="powerFactorInput" ></p>
+		<p>Starting Voltage: <input type="text" id="startingVoltage" ></p>
+		<p>Target Max Voltage Drop (%) <input type="text" id="maxVoltageDrop" ></p>
+<!--	<p>Phase: <input type="text" id="phase" ></p> -->
+		<table>
+			<tr>
+				<th width="80">Segment ID</th>
+				<th width="100">Segment Length</th>
+				<th width="105">Adj. Seg Length</th>
+				<th width="150">Segment Load (Watts) </th>
+				<th width="130">Cum. Seg. Load (A)</th>
+				<th width="90">Wire Size</th>
+				<th width="130">Segment Imp (Z) </th>
+				<th width="200">Segment Drop (V) </th>
+				<th width="130">Percentage Drop (%) </th>
+			</tr>
+			<tr>
+				<td>1</td>
+				<td><input type="text" id="segment1Length" ></td>
+				<td><span id="adjustedSegment1Length"></td>
+				<td><input type="text" id="segment1Load" ></td>
+				<td><span id="cumSeg1Load"></td>
+				<td><span id="wireSize1"></td>
+				<td><span id="segment1Imp"></span></td>
+				<td><span id="segment1Drop"></span></td>
+				<td><span id="totalPDrop"></span></td>
+			</tr>
+			<tr>
+				<td>2</td>
+				<td><input type="text" id="segment2Length" ></td>
+				<td><span id="adjustedSegment2Length"></td>
+				<td><input type="text" id="segment2Load" ></td>
+				<td><span id="cumSeg2Load"></td>
+				<td><span id="wireSize2"></td>
+				<td><span id="segment2Imp"></span></td>
+				<td><span id="segment2Drop"></span></td>
+				<td><b>Total Drop (V)</b></td>
+			</tr>
+			<tr>
+				<td>3</td>
+				<td><input type="text" id="segment3Length" ></td>
+				<td><span id="adjustedSegment3Length"></td>
+				<td><input type="text" id="segment3Load" ></td>
+				<td><span id="cumSeg3Load"></td>
+				<td><span id="wireSize3"></td>
+				<td><span id="segment3Imp"></span></td>
+				<td><span id="segment3Drop"></span></td>
+				<td><span id="totalDrop"></span></td>
+			</tr>
+			<tr>
+				<td>4</td>
+				<td><input type="text" id="segment4Length" ></td>
+				<td><span id="adjustedSegment4Length"></td>
+				<td><input type="text" id="segment4Load" ></td>
+				<td><span id="cumSeg4Load"></td>
+				<td><span id="wireSize4"></td>
+				<td><span id="segment4Imp"></span></td>
+				<td><span id="segment4Drop"></span></td>
+			</tr>
+			<tr>
+				<td>5</td>
+				<td><input type="text" id="segment5Length" ></td>
+				<td><span id="adjustedSegment5Length"></td>
+				<td><input type="text" id="segment5Load" ></td>
+				<td><span id="cumSeg5Load"></td>
+				<td><span id="wireSize5"></td>
+				<td><span id="segment5Imp"></span></td>
+				<td><span id="segment5Drop"></span></td>
+			</tr>
+			<tr>
+				<td>6</td>
+				<td><input type="text" id="segment6Length" ></td>
+				<td><span id="adjustedSegment6Length"></td>
+				<td><input type="text" id="segment6Load" ></td>
+				<td><span id="cumSeg6Load"></td>
+				<td><span id="wireSize6"></td>
+				<td><span id="segment6Imp"></span></td>
+				<td><span id="segment6Drop"></span></td>
+			</tr>
+			<tr>
+				<td>7</td>
+				<td><input type="text" id="segment7Length" ></td>
+				<td><span id="adjustedSegment7Length"></td>
+				<td><input type="text" id="segment7Load" ></td>
+				<td><span id="cumSeg7Load"></td>
+				<td><span id="wireSize7"></td>
+				<td><span id="segment7Imp"></span></td>
+				<td><span id="segment7Drop"></span></td>
+			</tr>
+			<tr>
+				<td>8</td>
+				<td><input type="text" id="segment8Length" ></td>
+				<td><span id="adjustedSegment8Length"></td>
+				<td><input type="text" id="segment8Load" ></td>
+				<td><span id="cumSeg8Load"></td>
+				<td><span id="wireSize8"></td>
+				<td><span id="segment8Imp"></span></td>
+				<td><span id="segment8Drop"></span></td>
+			</tr>			
+		</table>
+		<br>
+		<button onclick="calculate()">Optimize Automatically!</button><br>
+
+
+
+		
+		<script>
+			
+			function calculate() {
+				// Per 1000'. These tables are from the NEC table for Steel Conduit and Copper Conductor, the worst cases
+				var rTable = [3.1,2,1.2,0.78,0.49,0.31,0.25,0.19,0.15,0.12,0.1,0.08,0.06,0.05,0.04,0.04,0.03,0.03,0.02,0.02,0.02] ;
+				
+				var xTable = [0.073,0.068,0.063,0.065,0.064,0.06,0.059,0.057,0.057,0.055,0.054,0.052,0.051,0.052,0.051,0.05,0.049,0.048,0.048,0.048,0.046] ;
+				// Pricing from Southwire: http://www.southwire.com/ordering/PriceSheetIndex.htm 11/2017
+				// Labor pricing from 2010 RSMeans
+				// Prices are per foot
+				var marketPrices = [0.44119,0.56433,0.71778,1.0153,1.3482,1.84652,2.233,2.71629,3.28454,3.95684,4.88115,49.17441,7.44161,9.8262,11.81509,11.59275,13.01753,15.74741,20.07146,31.587,41.609] ;
+
+				//Pulls in inputs
+				var powerFactor = document.getElementById("powerFactorInput").value ;	
+				var startingVoltage = document.getElementById("startingVoltage").value;
+				// var phase = document.getElementById("phase").value;
+				
+				var segmentLength = [];
+					segmentLength[0] = document.getElementById("segment1Length").value;
+					segmentLength[1] = document.getElementById("segment2Length").value;
+					segmentLength[2] = document.getElementById("segment3Length").value;
+					segmentLength[3] = document.getElementById("segment4Length").value;
+					segmentLength[4] = document.getElementById("segment5Length").value;
+					segmentLength[5] = document.getElementById("segment6Length").value;
+					segmentLength[6] = document.getElementById("segment7Length").value;
+					segmentLength[7] = document.getElementById("segment8Length").value;
+			
+				var load = [] ;
+					load[0] = document.getElementById("segment1Load").value ;
+					load[1] = document.getElementById("segment2Load").value ;
+					load[2] = document.getElementById("segment3Load").value ;
+					load[3] = document.getElementById("segment4Load").value ;
+					load[4] = document.getElementById("segment5Load").value ;
+					load[5] = document.getElementById("segment6Load").value ;
+					load[6] = document.getElementById("segment7Load").value ;
+					load[7] = document.getElementById("segment8Load").value ;
+				
+				var segmentLoad = [] ;
+					segmentLoad[0] = (Number(load[0]) + Number(load[1]) + Number(load[2]) + Number(load[3]) + Number(load[4]) + Number(load[5]) + Number(load[6]) + Number(load[7]))/powerFactor/startingVoltage;
+					segmentLoad[1] = (Number(load[1]) + Number(load[2]) + Number(load[3]) + Number(load[4]) + Number(load[5]) + Number(load[6]) + Number(load[7]))/powerFactor/startingVoltage;
+					segmentLoad[2] = (Number(load[2]) + Number(load[3]) + Number(load[4]) + Number(load[5]) + Number(load[6]) + Number(load[7]))/powerFactor/startingVoltage;
+					segmentLoad[3] = (Number(load[3]) + Number(load[4]) + Number(load[5]) + Number(load[6]) + Number(load[7]))/powerFactor/startingVoltage;
+					segmentLoad[4] = (Number(load[4]) + Number(load[5]) + Number(load[6]) + Number(load[7]))/powerFactor/startingVoltage;
+					segmentLoad[5] = (Number(load[5]) + Number(load[6]) + Number(load[7]))/powerFactor/startingVoltage;
+					segmentLoad[6] = (Number(load[6]) + Number(load[7]))/powerFactor/startingVoltage;
+					segmentLoad[7] = (Number(load[7]))/powerFactor/startingVoltage;
+				
+				var adjustedSegmentLength = [] ;
+				for (var i = 0; i<8; i++) {
+					adjustedSegmentLength[i] = segmentLength[i]*2 ;		// doubled when single phase	
+				}
+				
+				//displays the Adj. Seg Length 
+				var adjSegmentLength = [] ;
+				var adjustedSegmentLengthLoc = ["adjustedSegment1Length", "adjustedSegment2Length", "adjustedSegment3Length", "adjustedSegment4Length", "adjustedSegment5Length", "adjustedSegment6Length", "adjustedSegment7Length", "adjustedSegment8Length"];
+				for (i=0;i<8;i++) {
+					var adjSegmentLength = document.getElementById(adjustedSegmentLengthLoc[i]) ;
+					adjSegmentLength.innerHTML = adjustedSegmentLength[i] ;
+				}
+					
+				//displays Cum. Seg. Load
+				var adjSegmentload = [] ;
+				var cumSegLoadLoc = ["cumSeg1Load", "cumSeg2Load", "cumSeg3Load", "cumSeg4Load", "cumSeg5Load", "cumSeg6Load", "cumSeg7Load", "cumSeg8Load" ] ;
+				for (i=0;i<8;i++) {
+					adjSegmentload[i] = document.getElementById(cumSegLoadLoc[i]) ;
+					adjSegmentload[i].innerHTML = segmentLoad[i] ;
+				}
+				
+				//defines the impedence function
+				var impedenceCalc = function(r,x,powerFactor, adjustedSegmentLength) {
+					r1 = adjustedSegmentLength/1000*r ;
+					x1 = adjustedSegmentLength/1000*x ;
+					var a = Math.acos(powerFactor) ;
+					var b = Math.sin(a) ;
+					return r1 * powerFactor + x1 * b ; //segment impedence, Z = R*PF + X*sin(acos(PF))
+				}
+
+				//defines the voltage drop function
+				var voltageDrop = function(i,z) {
+					var segmentDrop = i * z ; // v = i*z
+					return segmentDrop //segment voltage drop
+				}	
+				//defines the sum() function
+				function sum(input){  //creates the "sum" function
+					var total =  0;
+					for(var i=0;i<input.length;i++)
+							  {                  
+								if(isNaN(input[i])){
+								continue;
+								 }
+								  total += Number(input[i]);
+							   }
+							 return total;
+				}
+				
+				//optimizes the cable size to up to but not equal to the desired %drop
+				var impArrayValues = [];
+				var dropArrayValues = [] ;
+				var percentDrop = 100 ;
+				var cableSize = [0,0,0,0,0,0,0,0] ;
+					for (var i=0;i<20; i++) {
+							for (var j=0;(j<8) && (percentDrop > 3); j++) {
+							cableSize[j] += 1 ;
+								for(var k=0; k<8; k++) {
+									impArrayValues[k] = impedenceCalc(rTable[cableSize[k]],xTable[cableSize[k]],powerFactor,adjustedSegmentLength[k]) ; //create Impedence Array				
+								}
+								for(var l=0; l<8; l++) { 
+									dropArrayValues[l] = voltageDrop(segmentLoad[l],impArrayValues[l]) ; //create Voltage Drop Array
+								}
+								var totalDrop = sum(dropArrayValues);
+								var percentDrop = totalDrop/startingVoltage*100 ;	
+							}	
+					}
+				console.log(impArrayValues) ;
+
+				//This part is just for the text in the Wire Size column
+				var	cableSizeKey = ["#14", "#12", "#10", "#8", "#6", "#4", "#3", "#2", "#1", "1/0", "2/0", "3/0", "4/0", "250kcm", "300kcm", "350kmc", "400kcm", "500kcm", "600kcm", "750kcm", "1000kcm"]
+				var cableNames = [] ; 
+
+				for(var i=0; i<8; i++) {
+					cableNames[i] = cableSizeKey[cableSize[i]] ; //displays the size from the key using cableSize as an index	
+				}
+				var wireSizeLoc = ["wireSize1", "wireSize2", "wireSize3", "wireSize4", "wireSize5", "wireSize6", "wireSize7", "wireSize8"] ;
+
+				for (var i=0; i<8; i++) { // This zero's out rows that have no impedence
+					if (impArrayValues[i] == 0) {
+						cableNames[i] = 0 ;
+						}
+				}
+				
+				var wireSizeLocation = [] ;
+				for(var i=0; i<8; i++) {
+					wireSizeLocation[i] = document.getElementById(wireSizeLoc[i]) ; //displays the array in the table
+					wireSizeLocation[i].innerHTML = cableNames[i] ; //displays the values in the table
+				}				
+
+
+				console.log(cableNames) ;
+				//displays the impedence information
+				var impArrayLocation = [];
+				var callImpArray = ["segment1Imp", "segment2Imp", "segment3Imp", "segment4Imp", "segment5Imp", "segment6Imp", "segment7Imp", "segment8Imp"] ;
+				
+				for(var i=0; i<8; i++) {
+					impArrayValues[i] = impedenceCalc(rTable[cableSize[i]],xTable[cableSize[i]],powerFactor,adjustedSegmentLength[i]) ; //create Impedence Array
+				}	
+				
+				for(var i=0; i<8; i++) {
+					impArrayLocation[i] = document.getElementById(callImpArray[i]) ; //displays the array in the table
+					impArrayLocation[i].innerHTML = impArrayValues[i] ;
+				}
+				
+				//displays the voltage drop information
+				var dropArrayLocation = [] ;
+				var callDropArray = ["segment1Drop", "segment2Drop", "segment3Drop", "segment4Drop", "segment5Drop", "segment6Drop", "segment7Drop", "segment8Drop"] ;
+				
+				for(var i=0; i<8; i++) { 
+					dropArrayValues[i] = voltageDrop(segmentLoad[i],impArrayValues[i]) ; //create Voltage Drop Array
+				}
+
+				for (var i=0; i<8; i++) {
+					dropArrayLocation[i] = document.getElementById(callDropArray[i]) ;
+					dropArrayLocation[i].innerHTML = dropArrayValues[i] ;
+				}
+				
+				
+				//display the total drop percentage
+					
+				//var totalDrop = sum(dropArrayValues); //generates the sum of the array
+				
+				var totalDropPos = document.getElementById("totalDrop") ;
+					totalDropPos.innerHTML = totalDrop ; //displays the total drop
+				var totalPDropPos = document.getElementById("totalPDrop") ;
+					totalPDropPos.innerHTML = percentDrop ; //displays the total drop percent
+									
+			}
+			
+
+		</script>
+	</body>
+
+</html>
