@@ -16,8 +16,9 @@
 	</head>
 	<body>
 		<h2>Voltage Drop Calculator</h2>
-		<h4>By Aaron Hesse, PE, RCDD</h4>
-		
+		<h3><i>For Rapid Sizing of Single Phase Load Strings</h3>
+		<h4>By Aaron Hesse, PE, RCDD</i></h4>
+		<br>
 		<p>Power Factor: <input type="text" id="powerFactorInput" ></p>
 		<p>Starting Voltage: <input type="text" id="startingVoltage" ></p>
 		<p>Target Max Voltage Drop (%) <input type="text" id="maxVoltageDrop" ></p>
@@ -25,12 +26,12 @@
 		<table>
 			<tr>
 				<th width="80">Segment ID</th>
-				<th width="100">Segment Length</th>
-				<th width="105">Adj. Seg Length</th>
+				<th width="100">Seg. Length (ft)</th>
+				<th width="130">Adj. Seg. Length (ft)</th>
 				<th width="150">Segment Load (Watts) </th>
 				<th width="130">Cum. Seg. Load (A)</th>
 				<th width="90">Wire Size</th>
-				<th width="130">Segment Imp (Z) </th>
+				<th width="130">Segment Imp. (Z) </th>
 				<th width="200">Segment Drop (V) </th>
 				<th width="130">Percentage Drop (%) </th>
 			</tr>
@@ -120,7 +121,18 @@
 		</table>
 		<br>
 		<button onclick="calculate()">Optimize Automatically!</button><br>
-
+		<br><br>
+		<p>Notes: <br>
+		<ul>
+		<li>Resistance and Reactances are taken from NFPA 70 Chapter 9 Table 9 "Alternating-Current Reistance and Reactance for 600V Cables".
+		<li>Conduit is assumed to be metalic (worse case reactance) and copper conductors.
+		<li>Effective Z is calculated using Z = R*PF + X*sin(acos(PF)).
+		<li>This only works for single phase loads.
+		<li>Adj. Seg. Length doubles the length in order to include the impedence of the return path.
+		<li>The first segment can no smaller than #12, I'm not really sure why.
+		<li>NEC recommends a max voltage drop of <b>3% from the panel and 5% overall</b> if you include the feeder to the panel.
+		<li>Coded in HTML/CSS/JavaScript.
+		</ul>
 
 
 		
@@ -139,6 +151,7 @@
 				//Pulls in inputs
 				var powerFactor = document.getElementById("powerFactorInput").value ;	
 				var startingVoltage = document.getElementById("startingVoltage").value;
+				var maxVoltageDrop = document.getElementById("maxVoltageDrop").value ;
 				// var phase = document.getElementById("phase").value;
 				
 				var segmentLength = [];
@@ -209,14 +222,13 @@
 				//defines the sum() function
 				function sum(input){  //creates the "sum" function
 					var total =  0;
-					for(var i=0;i<input.length;i++)
-							  {                  
+					for(var i=0;i<input.length;i++) {
 								if(isNaN(input[i])){
 								continue;
-								 }
-								  total += Number(input[i]);
-							   }
-							 return total;
+								}
+								total += Number(input[i]);
+					}
+					return total;
 				}
 				
 				//optimizes the cable size to up to but not equal to the desired %drop
@@ -225,8 +237,8 @@
 				var percentDrop = 100 ;
 				var cableSize = [0,0,0,0,0,0,0,0] ;
 					for (var i=0;i<20; i++) {
-							for (var j=0;(j<8) && (percentDrop > 3); j++) {
-							cableSize[j] += 1 ;
+							for (var j=0;(j<8) && (percentDrop > maxVoltageDrop); j++) {
+
 								for(var k=0; k<8; k++) {
 									impArrayValues[k] = impedenceCalc(rTable[cableSize[k]],xTable[cableSize[k]],powerFactor,adjustedSegmentLength[k]) ; //create Impedence Array				
 								}
@@ -235,6 +247,7 @@
 								}
 								var totalDrop = sum(dropArrayValues);
 								var percentDrop = totalDrop/startingVoltage*100 ;	
+								cableSize[j] += 1;
 							}	
 					}
 				console.log(impArrayValues) ;
