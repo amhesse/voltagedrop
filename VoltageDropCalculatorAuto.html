@@ -239,7 +239,7 @@
 				var cableSize = [1,1,1,1,1,1,1,1] ;
 					for (var i=0;i<8; i++) {
 							for (var j=0;(j<6) && (percentDrop > maxVoltageDrop); j++) {
-								cableSize[j] += 1;	
+								cableSize[i] += 1;	
 								for(var k=0; k<8; k++) {
 									impArrayValues[k] = impedenceCalc(rTable[cableSize[k]],xTable[cableSize[k]],powerFactor,adjustedSegmentLength[k]) ; //create Impedence Array				
 								}
