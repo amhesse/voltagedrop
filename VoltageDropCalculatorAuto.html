@@ -16,8 +16,8 @@
 	</head>
 	<body>
 		<h2>Voltage Drop Calculator</h2>
-		<h3><i>For Rapid Sizing of Single Phase Load Strings</h3>
-		<h4>By Aaron Hesse, PE, RCDD</i></h4>
+		<h4><i>For Rapid Sizing of Single Phase Load Strings</h4>
+		<h5>By Aaron Hesse, PE, RCDD</i></h5>
 		<br>
 		<p>Power Factor: <input type="text" id="powerFactorInput" ></p>
 		<p>Starting Voltage: <input type="text" id="startingVoltage" ></p>
@@ -238,7 +238,7 @@
 				var cableSize = [0,0,0,0,0,0,0,0] ;
 					for (var i=0;i<20; i++) {
 							for (var j=0;(j<8) && (percentDrop > maxVoltageDrop); j++) {
-
+								cableSize[i] += 1;	
 								for(var k=0; k<8; k++) {
 									impArrayValues[k] = impedenceCalc(rTable[cableSize[k]],xTable[cableSize[k]],powerFactor,adjustedSegmentLength[k]) ; //create Impedence Array				
 								}
@@ -247,7 +247,7 @@
 								}
 								var totalDrop = sum(dropArrayValues);
 								var percentDrop = totalDrop/startingVoltage*100 ;	
-								cableSize[i] += 1;	
+
 							}
 					}
 				console.log(impArrayValues) ;
