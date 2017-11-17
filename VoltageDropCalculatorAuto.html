@@ -16,7 +16,7 @@
 	</head>
 	<body>
 		<h2>Voltage Drop Calculator</h2>
-		<h4><i>For Rapid Sizing of Single Phase Load Strings</h4>
+		<h4><i>For Rapid Sizing of Single Phase AC Load Strings</h4>
 		<h5>By Aaron Hesse, PE, RCDD</i></h5>
 		<br>
 		<p>Power Factor: <input type="text" id="powerFactorInput" ></p>
@@ -129,9 +129,10 @@
 		<li>Effective Z is calculated using Z = R*PF + X*sin(acos(PF)).
 		<li>This only works for single phase loads.
 		<li>Adj. Seg. Length doubles the length in order to include the impedence of the return path.
-		<li>The first segment can no smaller than #12, I'm not really sure why.
+		<li>The first segment can no smaller than #10, I'm not really sure why.
 		<li>NEC recommends a max voltage drop of <b>3% from the panel and 5% overall</b> if you include the feeder to the panel.
 		<li>Coded in HTML/CSS/JavaScript.
+		<br><p>Disclaimer: Using this tool does not excuse you from exercising sound engineering judgment.</p>
 		</ul>
 
 
@@ -235,22 +236,21 @@
 				var impArrayValues = [];
 				var dropArrayValues = [] ;
 				var percentDrop = 100 ;
-				var cableSize = [0,0,0,0,0,0,0,0] ;
-					for (var i=0;i<20; i++) {
-							for (var j=0;(j<8) && (percentDrop > maxVoltageDrop); j++) {
-								cableSize[i] += 1;	
+				var cableSize = [1,1,1,1,1,1,1,1] ;
+					for (var i=0;i<8; i++) {
+							for (var j=0;(j<19) && (percentDrop > maxVoltageDrop); j++) {
+									
 								for(var k=0; k<8; k++) {
 									impArrayValues[k] = impedenceCalc(rTable[cableSize[k]],xTable[cableSize[k]],powerFactor,adjustedSegmentLength[k]) ; //create Impedence Array				
 								}
-								for(var l=0; l<8; l++) { 
-									dropArrayValues[l] = voltageDrop(segmentLoad[l],impArrayValues[l]) ; //create Voltage Drop Array
+								for(var m=0; m<8; m++) { 
+									dropArrayValues[m] = voltageDrop(segmentLoad[m],impArrayValues[m]) ; //create Voltage Drop Array
 								}
 								var totalDrop = sum(dropArrayValues);
 								var percentDrop = totalDrop/startingVoltage*100 ;	
-
+								cableSize[j] += 1;
 							}
 					}
-				console.log(impArrayValues) ;
 
 				//This part is just for the text in the Wire Size column
 				var	cableSizeKey = ["#14", "#12", "#10", "#8", "#6", "#4", "#3", "#2", "#1", "1/0", "2/0", "3/0", "4/0", "250kcm", "300kcm", "350kmc", "400kcm", "500kcm", "600kcm", "750kcm", "1000kcm"]
