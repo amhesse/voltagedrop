@@ -16,13 +16,13 @@
 	</head>
 	<body>
 		<h2>Voltage Drop Calculator</h2>
-		<h4><i>For Rapid Sizing of Single Phase AC Load Strings</h4>
-		<h5>By Aaron Hesse, PE, RCDD</i></h5>
+		<i><h4>For Rapid Sizing of Single Phase AC Load Strings</h4>
+		<h5>By Aaron Hesse, PE, RCDD</h5></i>
 		<br>
 		<p>Power Factor: <input type="text" id="powerFactorInput" ></p>
 		<p>Starting Voltage: <input type="text" id="startingVoltage" ></p>
 		<p>Target Max Voltage Drop (%) <input type="text" id="maxVoltageDrop" ></p>
-<!--	<p>Phase: <input type="text" id="phase" ></p> -->
+		<br>
 		<table>
 			<tr>
 				<th width="80">Segment ID</th>
@@ -34,14 +34,15 @@
 				<th width="130">Segment Imp. (Z) </th>
 				<th width="200">Segment Drop (V) </th>
 				<th width="130">Percentage Drop (%) </th>
+				
 			</tr>
 			<tr>
 				<td>1</td>
 				<td><input type="text" id="segment1Length" ></td>
-				<td><span id="adjustedSegment1Length"></td>
+				<td><span id="adjustedSegment1Length"></span></td>
 				<td><input type="text" id="segment1Load" ></td>
-				<td><span id="cumSeg1Load"></td>
-				<td><span id="wireSize1"></td>
+				<td><span id="cumSeg1Load"></span></td>
+				<td><span id="wireSize1"></span></td>
 				<td><span id="segment1Imp"></span></td>
 				<td><span id="segment1Drop"></span></td>
 				<td><span id="totalPDrop"></span></td>
@@ -49,10 +50,10 @@
 			<tr>
 				<td>2</td>
 				<td><input type="text" id="segment2Length" ></td>
-				<td><span id="adjustedSegment2Length"></td>
+				<td><span id="adjustedSegment2Length"></span></td>
 				<td><input type="text" id="segment2Load" ></td>
-				<td><span id="cumSeg2Load"></td>
-				<td><span id="wireSize2"></td>
+				<td><span id="cumSeg2Load"></span></td>
+				<td><span id="wireSize2"></span></td>
 				<td><span id="segment2Imp"></span></td>
 				<td><span id="segment2Drop"></span></td>
 				<td><b>Total Drop (V)</b></td>
@@ -60,10 +61,10 @@
 			<tr>
 				<td>3</td>
 				<td><input type="text" id="segment3Length" ></td>
-				<td><span id="adjustedSegment3Length"></td>
+				<td><span id="adjustedSegment3Length"></span></td>
 				<td><input type="text" id="segment3Load" ></td>
-				<td><span id="cumSeg3Load"></td>
-				<td><span id="wireSize3"></td>
+				<td><span id="cumSeg3Load"></span></td>
+				<td><span id="wireSize3"></span></td>
 				<td><span id="segment3Imp"></span></td>
 				<td><span id="segment3Drop"></span></td>
 				<td><span id="totalDrop"></span></td>
@@ -71,50 +72,52 @@
 			<tr>
 				<td>4</td>
 				<td><input type="text" id="segment4Length" ></td>
-				<td><span id="adjustedSegment4Length"></td>
+				<td><span id="adjustedSegment4Length"></span></td>
 				<td><input type="text" id="segment4Load" ></td>
-				<td><span id="cumSeg4Load"></td>
-				<td><span id="wireSize4"></td>
+				<td><span id="cumSeg4Load"></span></td>
+				<td><span id="wireSize4"></span></td>
 				<td><span id="segment4Imp"></span></td>
 				<td><span id="segment4Drop"></span></td>
+				<td><b>Est. Cost (USD)</b></td>
 			</tr>
 			<tr>
 				<td>5</td>
 				<td><input type="text" id="segment5Length" ></td>
-				<td><span id="adjustedSegment5Length"></td>
+				<td><span id="adjustedSegment5Length"></span></td>
 				<td><input type="text" id="segment5Load" ></td>
-				<td><span id="cumSeg5Load"></td>
-				<td><span id="wireSize5"></td>
+				<td><span id="cumSeg5Load"></span></td>
+				<td><span id="wireSize5"></span></td>
 				<td><span id="segment5Imp"></span></td>
 				<td><span id="segment5Drop"></span></td>
+				<td>$<span id="estCost"></span></td>
 			</tr>
 			<tr>
 				<td>6</td>
 				<td><input type="text" id="segment6Length" ></td>
-				<td><span id="adjustedSegment6Length"></td>
+				<td><span id="adjustedSegment6Length"></span></td>
 				<td><input type="text" id="segment6Load" ></td>
-				<td><span id="cumSeg6Load"></td>
-				<td><span id="wireSize6"></td>
+				<td><span id="cumSeg6Load"></span></td>
+				<td><span id="wireSize6"></span></td>
 				<td><span id="segment6Imp"></span></td>
 				<td><span id="segment6Drop"></span></td>
 			</tr>
 			<tr>
 				<td>7</td>
 				<td><input type="text" id="segment7Length" ></td>
-				<td><span id="adjustedSegment7Length"></td>
+				<td><span id="adjustedSegment7Length"></span></td>
 				<td><input type="text" id="segment7Load" ></td>
-				<td><span id="cumSeg7Load"></td>
-				<td><span id="wireSize7"></td>
+				<td><span id="cumSeg7Load"></span></td>
+				<td><span id="wireSize7"></span></td>
 				<td><span id="segment7Imp"></span></td>
 				<td><span id="segment7Drop"></span></td>
 			</tr>
 			<tr>
 				<td>8</td>
 				<td><input type="text" id="segment8Length" ></td>
-				<td><span id="adjustedSegment8Length"></td>
+				<td><span id="adjustedSegment8Length"></span></td>
 				<td><input type="text" id="segment8Load" ></td>
-				<td><span id="cumSeg8Load"></td>
-				<td><span id="wireSize8"></td>
+				<td><span id="cumSeg8Load"></span></td>
+				<td><span id="wireSize8"></span></td>
 				<td><span id="segment8Imp"></span></td>
 				<td><span id="segment8Drop"></span></td>
 			</tr>			
@@ -123,17 +126,20 @@
 		<button onclick="calculate()">Optimize Automatically!</button><br>
 		<br><br>
 		<p>Notes: <br>
-		<ul>
+		<ol>
 		<li>Resistance and Reactances are taken from NFPA 70 Chapter 9 Table 9 "Alternating-Current Reistance and Reactance for 600V Cables".
 		<li>Conduit is assumed to be metalic (worse case reactance) and copper conductors.
 		<li>Effective Z is calculated using Z = R*PF + X*sin(acos(PF)).
 		<li>This only works for single phase loads.
 		<li>Adj. Seg. Length doubles the length in order to include the impedence of the return path.
-		<li>The first segment can no smaller than #10, I'm not really sure why.
+		<li>The first segment can be no smaller than #10, I'm not really sure why.
 		<li>NEC recommends a max voltage drop of <b>3% from the panel and 5% overall</b> if you include the feeder to the panel.
 		<li>Coded in HTML/CSS/JavaScript.
+		<li>Material costs are estimated using market pricing from Southwire, last updated 11.16.2017.
+		<li>Labor costs are for the cable only and do not include trenching or conduit. Picing from 2010 RSMeans.
+		<li>Cost shown is the combined material and labor costs.
 		<br><p>Disclaimer: Using this tool does not excuse you from exercising sound engineering judgment.</p>
-		</ul>
+		</ol>
 
 
 		
@@ -232,33 +238,136 @@
 					return total;
 				}
 				
+				
+				function indexOfMin(arr) {
+						if (arr.length === 0) {
+							return -1;
+						}
+
+						var min = arr[0];
+						var minIndex = 0;
+
+						for (var i = 1; i < arr.length; i++) {
+							if (arr[i] < min) {
+								minIndex = i;
+								min = arr[i];
+							}
+						}
+
+						return minIndex;
+				}
+				
 				//optimizes the cable size to up to but not equal to the desired %drop
 				var impArrayValues = [];
 				var dropArrayValues = [] ;
+				var maxWireSize = 1;
+
+				
 				var percentDrop = 100 ;
-				var cableSize = [1,1,1,1,1,1,1,1] ;
-					for (var i=0;i<8; i++) {
-							for (var j=0;(j<6) && (percentDrop > maxVoltageDrop); j++) {
-								cableSize[i] += 1;	
-								for(var k=0; k<8; k++) {
-									impArrayValues[k] = impedenceCalc(rTable[cableSize[k]],xTable[cableSize[k]],powerFactor,adjustedSegmentLength[k]) ; //create Impedence Array				
-								}
-								for(var m=0; m<8; m++) { 
-									dropArrayValues[m] = voltageDrop(segmentLoad[m],impArrayValues[m]) ; //create Voltage Drop Array
-								}
-								var totalDrop = sum(dropArrayValues);
-								var percentDrop = totalDrop/startingVoltage*100 ;	
+				var estCosts = [] ;
+				var costArray = [] ;
+				var estimatedCost = [] ;
+				var estimatedCostRound = 0 ;
+				cableSize = [];
+				cableSizeS = [];
+				allOptions = [] ;
+				indexCounter = 0 ;
+				var priceArray = [] ;
+				var dropArray = [] ;
+				var minIndex = 0;
+				totalDropArray = [0] ;
+				for (var y=0; (y<19)  ; y++) {    // increases max wire size
+					maxWireSize = y ;
+					var cableSizeS = [1,1,1,1,1,1,1,1] ; 	
+						for (var i=0;(i<8) ; i++) {		//moves over a column
+								colPos = i ;
+									for (var j=0;(j<maxWireSize) ; j++) {		//&& (percentDrop > maxVoltageDrop)	//increases the cell value 			
+										 
+											
+												for ( z = i ; (z<(8) )  ; z++ ) {
+													cableSizeS[z] = j+1;
+												
+													for(var k=0; k<8; k++) {
+													impArrayValues[k] = impedenceCalc(rTable[cableSizeS[k]],xTable[cableSizeS[k]],powerFactor,adjustedSegmentLength[k]) ; //create Impedence Array				
+													}
+													for(var m=0; m<8; m++) { 
+														dropArrayValues[m] = voltageDrop(segmentLoad[m],impArrayValues[m]) ; //create Voltage Drop Array
+													}
+												
+													var totalDrop = sum(dropArrayValues);
+													var percentDrop = totalDrop/startingVoltage*100 ; //Calcs the percent drop from the starting V
+													
+													cableSize = cableSizeS;
+																									 ;
+													for (var n=0;n<8;n++) {
+														estCosts[n] = adjustedSegmentLength[n] * marketPrices[cableSize[n]] ;	
+													} 
+													estimatedCost = sum(estCosts) ;	
+													estimatedCostRound = Math.round(estimatedCost) ;
+													
+													totalDropArray[indexCounter] = totalDrop ;
+													
+													priceArray[indexCounter] = estimatedCostRound ;
 
-							}
-					}
+													dropArray[indexCounter] = percentDrop ;
 
+													allOptions[indexCounter] = cableSizeS.slice(0) ;
+
+													for (var ii=0; ii<dropArray.length;ii++) {
+														if (dropArray[ii] > maxVoltageDrop) {
+															priceArray[ii] = 99999 ;
+														}
+													
+													}
+
+													
+													var value = priceArray[0];
+													for (var iii = 1; iii < priceArray.length; iii++) {
+													  if (priceArray[iii] < value) {
+														value = priceArray[iii];
+														minIndex = iii;
+													  }
+													}
+
+													
+													//console.log(allOptions[minIndex]) ;
+														//console.log(cableSizeS) ;
+														//console.log(allOptions.length) ;
+														//console.log(allOptions[100]) ;
+													
+
+													indexCounter += 1;
+													
+
+													
+												}	
+
+				
+												//var cableSizeS = [5,5,5,5,5,2,2,2] ;			
+
+
+											
+
+									}
+						}				
+				}
+
+											
+				//displays the costs
+			//	console.log(minIndexOfPriceArray) ;
+				
+				cableSize = allOptions[minIndex] ;
+				//console.log(cableSize) ;
+				costLocation = document.getElementById("estCost") ;
+				costLocation.innerHTML = priceArray[minIndex] ;
+				
 				//This part is just for the text in the Wire Size column
 				var	cableSizeKey = ["#14", "#12", "#10", "#8", "#6", "#4", "#3", "#2", "#1", "1/0", "2/0", "3/0", "4/0", "250kcm", "300kcm", "350kmc", "400kcm", "500kcm", "600kcm", "750kcm", "1000kcm"]
 				var cableNames = [] ; 
-
 				for(var i=0; i<8; i++) {
 					cableNames[i] = cableSizeKey[cableSize[i]] ; //displays the size from the key using cableSize as an index	
 				}
+				
 				var wireSizeLoc = ["wireSize1", "wireSize2", "wireSize3", "wireSize4", "wireSize5", "wireSize6", "wireSize7", "wireSize8"] ;
 
 				for (var i=0; i<8; i++) { // This zero's out rows that have no impedence
@@ -273,8 +382,6 @@
 					wireSizeLocation[i].innerHTML = cableNames[i] ; //displays the values in the table
 				}				
 
-
-				console.log(cableNames) ;
 				//displays the impedence information
 				var impArrayLocation = [];
 				var callImpArray = ["segment1Imp", "segment2Imp", "segment3Imp", "segment4Imp", "segment5Imp", "segment6Imp", "segment7Imp", "segment8Imp"] ;
@@ -303,13 +410,12 @@
 				
 				
 				//display the total drop percentage
-					
-				//var totalDrop = sum(dropArrayValues); //generates the sum of the array
+
 				
 				var totalDropPos = document.getElementById("totalDrop") ;
-					totalDropPos.innerHTML = totalDrop ; //displays the total drop
+					totalDropPos.innerHTML = totalDropArray[minIndex] ; //displays the total drop
 				var totalPDropPos = document.getElementById("totalPDrop") ;
-					totalPDropPos.innerHTML = percentDrop ; //displays the total drop percent
+					totalPDropPos.innerHTML = dropArray[minIndex] ; //displays the total drop percent
 									
 			}
 			
