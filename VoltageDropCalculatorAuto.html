@@ -21,17 +21,17 @@
 		<br>
 		<p>Power Factor: <input type="text" id="powerFactorInput" ></p>
 		<p>Starting Voltage: <input type="text" id="startingVoltage" ></p>
-		<p>Target Max Voltage Drop (%) <input type="text" id="maxVoltageDrop" ></p>
+		<p>Target Max Voltage Drop (%)<sup> 6</sup>: <input type="text" id="maxVoltageDrop" ></p>
 		<br>
 		<table>
 			<tr>
 				<th width="80">Segment ID</th>
 				<th width="100">Seg. Length (ft)</th>
-				<th width="130">Adj. Seg. Length (ft)</th>
+				<th width="150">Adj. Seg. Length (ft) <sup>5</sup></th>
 				<th width="150">Segment Load (Watts) </th>
 				<th width="130">Cum. Seg. Load (A)</th>
 				<th width="90">Wire Size</th>
-				<th width="130">Segment Imp. (Z) </th>
+				<th width="130">Segment Imp. (Z) <sup>3</sup> </th>
 				<th width="200">Segment Drop (V) </th>
 				<th width="130">Percentage Drop (%) </th>
 				
@@ -78,7 +78,7 @@
 				<td><span id="wireSize4"></span></td>
 				<td><span id="segment4Imp"></span></td>
 				<td><span id="segment4Drop"></span></td>
-				<td><b>Est. Cost (USD)</b></td>
+				<td><b>Est. Cost (USD) <sup>8,9,10</sup></b></td>
 			</tr>
 			<tr>
 				<td>5</td>
@@ -132,7 +132,6 @@
 		<li>Effective Z is calculated using Z = R*PF + X*sin(acos(PF)).
 		<li>This only works for single phase loads.
 		<li>Adj. Seg. Length doubles the length in order to include the impedence of the return path.
-		<li>The first segment can be no smaller than #10, I'm not really sure why.
 		<li>NEC recommends a max voltage drop of <b>3% from the panel and 5% overall</b> if you include the feeder to the panel.
 		<li>Coded in HTML/CSS/JavaScript.
 		<li>Material costs are estimated using market pricing from Southwire, last updated 11.16.2017.
