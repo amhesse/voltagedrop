@@ -127,15 +127,15 @@
 		<br><br>
 		<p>Notes: <br>
 		<ol>
-		<li>Resistance and Reactances are taken from NFPA 70 Chapter 9 Table 9 "Alternating-Current Reistance and Reactance for 600V Cables".
-		<li>Conduit is assumed to be metalic (worse case reactance) and copper conductors.
+		<li>Resistance and Reactances are taken from NFPA 70 Chapter 9 Table 9 "Alternating-Current Resistance and Reactance for 600V Cables".
+		<li>Conduit is assumed to be metallic (worse case reactance) and copper conductors.
 		<li>Effective Z is calculated using Z = R*PF + X*sin(acos(PF)).
 		<li>This only works for single phase loads.
-		<li>Adj. Seg. Length doubles the length in order to include the impedence of the return path.
+		<li>Adj. Seg. Length doubles the length in order to include the impedance of the return path.
 		<li>NEC recommends a max voltage drop of <b>3% from the panel and 5% overall</b> if you include the feeder to the panel.
 		<li>Coded in HTML/CSS/JavaScript.
 		<li>Material costs are estimated using market pricing from Southwire, last updated 11.16.2017.
-		<li>Labor costs are for the cable only and do not include trenching or conduit. Picing from 2010 RSMeans.
+		<li>Labor costs are for the cable only and do not include trenching or conduit. Pricing from 2010 RSMeans.
 		<li>Cost shown is the combined material and labor costs.
 		<br><p>Disclaimer: Using this tool does not excuse you from exercising sound engineering judgment.</p>
 		</ol>
@@ -314,7 +314,7 @@
 
 													for (var ii=0; ii<dropArray.length;ii++) {
 														if (dropArray[ii] > maxVoltageDrop) {
-															priceArray[ii] = 99999 ;
+															priceArray[ii] = 9999999999 ;
 														}
 													
 													}
