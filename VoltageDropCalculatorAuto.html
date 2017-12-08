@@ -11,17 +11,35 @@
 				background-color:white ;
 				text-align: left;
 			}
+			table {
+				text-align:left;
+			}
 		</style>
-
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js">
+		//script for the chart via Chart.js
+		</script>
 	</head>
 	<body>
-		<h2>Voltage Drop Calculator</h2>
-		<i><h4>For Rapid Sizing of Single Phase AC Load Strings</h4>
-		<h5>By Aaron Hesse, PE, RCDD</h5></i>
-		<br>
-		<p>Power Factor: <input type="text" id="powerFactorInput" ></p>
-		<p>Starting Voltage: <input type="text" id="startingVoltage" ></p>
-		<p>Target Max Voltage Drop (%)<sup> 6</sup>: <input type="text" id="maxVoltageDrop" ></p>
+	<table>
+		<tr>
+			<th width="500">
+					<h2>Voltage Drop Calculator</h2>
+					<i><h4>For Rapid Sizing of Single Phase AC Load Strings</h4>
+					<h5>By Aaron Hesse, PE, RCDD</h5></i>
+
+					<p>Power Factor: <input size="15" type="text" id="powerFactorInput" ></p>
+					<p>Starting Voltage: <input  size="15" type="text" id="startingVoltage" ></p>
+					<p>Target Max Voltage Drop (%)<sup> 6</sup>: <input  size="15" type="text" id="maxVoltageDrop" ></p>
+			</th>
+			<th>
+
+			<canvas id="myChart" width="600" height="230" ></canvas>
+
+
+			</th>
+		</tr>
+	</table>
+
 		<br>
 		<table>
 			<tr>
@@ -124,7 +142,11 @@
 		</table>
 		<br>
 		<button onclick="calculate()">Optimize Automatically!</button><br>
-		<br><br>
+		<br>
+		<div style="width: 400px">
+			<canvas id="myChart" width="400" height="400"></canvas>
+		</div>
+		<br>
 		<p>Notes: <br>
 		<ol>
 		<li>Resistance and Reactances are taken from NFPA 70 Chapter 9 Table 9 "Alternating-Current Resistance and Reactance for 600V Cables".
@@ -353,22 +375,20 @@
 
 											
 				//displays the costs
-			//	console.log(minIndexOfPriceArray) ;
 				
 				cableSize = allOptions[minIndex] ;
-				//console.log(cableSize) ;
 				costLocation = document.getElementById("estCost") ;
 				costLocation.innerHTML = priceArray[minIndex] ;
 				
 				//This part is just for the text in the Wire Size column
-				var	cableSizeKey = ["#14", "#12", "#10", "#8", "#6", "#4", "#3", "#2", "#1", "1/0", "2/0", "3/0", "4/0", "250kcm", "300kcm", "350kmc", "400kcm", "500kcm", "600kcm", "750kcm", "1000kcm"]
+				var	cableSizeKey = ["#14 AWG", "#12 AWG", "#10 AWG", "#8 AWG", "#6 AWG", "#4 AWG", "#3 AWG", "#2 AWG", "#1 AWG", "1/0 AWG", "2/0 AWG", "3/0 AWG", "4/0 AWG", "250kcm", "300kcm", "350kmc", "400kcm", "500kcm", "600kcm", "750kcm", "1000kcm"]
 				var cableNames = [] ; 
 				for(var i=0; i<8; i++) {
 					cableNames[i] = cableSizeKey[cableSize[i]] ; //displays the size from the key using cableSize as an index	
 				}
 				
 				var wireSizeLoc = ["wireSize1", "wireSize2", "wireSize3", "wireSize4", "wireSize5", "wireSize6", "wireSize7", "wireSize8"] ;
-
+				
 				for (var i=0; i<8; i++) { // This zero's out rows that have no impedence
 					if (impArrayValues[i] == 0) {
 						cableNames[i] = 0 ;
@@ -408,18 +428,69 @@
 				}
 				
 				
-				//display the total drop percentage
-
 				
+				//display the total drop percentage
+	
 				var totalDropPos = document.getElementById("totalDrop") ;
 					totalDropPos.innerHTML = totalDropArray[minIndex] ; //displays the total drop
 				var totalPDropPos = document.getElementById("totalPDrop") ;
 					totalPDropPos.innerHTML = dropArray[minIndex] ; //displays the total drop percent
-									
-			}
-			
+				
+				var ctx = document.getElementById("myChart").getContext('2d');
+				
+				var segmentVoltageForGraph = [] ;
+				
+				//calculates the voltage at each segment for the graph
+				segmentVoltageForGraph[0] = startingVoltage ;
+				for (var i=0; i<8; i++) {
+					if (dropArrayValues[i] === 0) {
+							
+					} else {
+							segmentVoltageForGraph[i+1] = segmentVoltageForGraph[i] - dropArrayValues[i]  ;
+					}
+					
+				}
+				
+				//displays the graph in the canvas above
+				var ctx = document.getElementById("myChart").getContext("2d");
+				var myChart = new Chart(ctx, {
+					type: 'line',
 
+					data: {
+						labels: ["Source", "1", "2", "3", "4", "5", "6", "7", "8"],
+						datasets: [{
+							label: 'Voltage',
+							data: segmentVoltageForGraph,
+							fill:false,
+							backgroundColor: 
+								'rgba(255, 99, 132, 0.2)',
+							//	'rgba(54, 162, 235, 0.2)',
+							//	'rgba(255, 206, 86, 0.2)',
+							//	'rgba(75, 192, 192, 0.2)',
+							//	'rgba(153, 102, 255, 0.2)',
+							//	'rgba(255, 159, 64, 0.2)'
+						
+							borderColor: 
+								'rgba(255,99,132,1)',
+
+							
+							borderWidth: 2
+						}]
+					},
+					options: {
+						scales: {
+							yAxes: [{
+								ticks: {
+									beginAtZero:false
+								}
+							}]
+						}
+					}
+				});	
+			}
 		</script>
+					
+
 	</body>
 
 </html>
