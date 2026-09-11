@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voltage Drop Calculator - Aaron Hesse, PE, RCDD</title>
+<style>
+	:root {
+		--bg: #f6f7f9; --panel: #fff; --text: #1c2128; --muted: #5d6673; --line: #dde1e6;
+		--accent: #1f6feb; --ok: #1a7f37; --warn: #9a6700; --bad: #cf222e;
+		--ok-bg: #dafbe1; --warn-bg: #fff8c5; --bad-bg: #ffebe9;
+	}
+	@media (prefers-color-scheme: dark) {
+		:root {
+			--bg: #0d1117; --panel: #161b22; --text: #e6edf3; --muted: #8d96a0; --line: #30363d;
+			--accent: #4493f8; --ok: #3fb950; --warn: #d29922; --bad: #f85149;
+			--ok-bg: #12261e; --warn-bg: #272115; --bad-bg: #2d1517;
+		}
+	}
+	* { box-sizing: border-box; }
+	body { margin: 0; padding: 24px 16px 48px; background: var(--bg); color: var(--text);
+		font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+	main { max-width: 1100px; margin: 0 auto; }
+	header h1 { margin: 0; font-size: 22px; }
+	header p { margin: 2px 0 0; color: var(--muted); }
+	.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; margin-top: 16px; }
+	.panel h2 { margin: 0 0 12px; font-size: 15px; }
+	.inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+	label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+	.field { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); }
+	.field:focus-within { border-color: var(--accent); }
+	.field input, .field select { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--text); font: inherit; padding: 6px 8px; outline: none; }
+	.field .unit { padding: 0 8px; color: var(--muted); font-size: 12px; }
+	input.invalid, .field.invalid { border-color: var(--bad); }
+	.check { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--text); margin: 0; padding-top: 20px; }
+	.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+	.card { border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: var(--panel); }
+	.card .k { font-size: 12px; color: var(--muted); }
+	.card .v { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+	.card.ok { border-color: var(--ok); background: var(--ok-bg); }
+	.card.warn { border-color: var(--warn); background: var(--warn-bg); }
+	.card.bad { border-color: var(--bad); background: var(--bad-bg); }
+	.msg { margin-top: 12px; padding: 8px 12px; border-radius: 6px; background: var(--bad-bg); color: var(--bad); border: 1px solid var(--bad); }
+	.chart-wrap { position: relative; height: 240px; }
+	.table-wrap { overflow-x: auto; }
+	table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+	th, td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+	th { font-size: 12px; color: var(--muted); font-weight: 600; }
+	th:first-child, td:first-child { text-align: left; }
+	td .field { width: 120px; }
+	td .field input { width: 100%; }
+	td.size { font-weight: 600; text-align: left; }
+	.pill { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 12px; }
+	.pill.ok { background: var(--ok-bg); color: var(--ok); }
+	.pill.warn { background: var(--warn-bg); color: var(--warn); }
+	.pill.bad { background: var(--bad-bg); color: var(--bad); }
+	.toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+	button { font: inherit; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--text); cursor: pointer; }
+	button:hover { border-color: var(--accent); }
+	button.x { padding: 2px 8px; color: var(--muted); }
+	.notes { color: var(--muted); font-size: 12px; }
+	.notes li { margin-bottom: 3px; }
+	@media print {
+		body { background: #fff; color: #000; padding: 0; }
+		.toolbar, button.x, .no-print { display: none !important; }
+		.panel, .card { border-color: #999; break-inside: avoid; }
+		.field { border: 0; }
+	}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+<main>
+	<header>
+		<h1>Voltage Drop Calculator</h1>
+		<p>Wire sizing for single-phase AC load strings &middot; Aaron Hesse, PE, RCDD</p>
+	</header>
+
+	<section class="panel">
+		<h2>Circuit</h2>
+		<div class="inputs">
+			<div><label for="pf">Power factor</label>
+				<div class="field"><input id="pf" type="number" min="0.1" max="1" step="0.01" value="0.9"></div></div>
+			<div><label for="volts">Source voltage</label>
+				<div class="field"><input id="volts" type="number" min="1" step="1" value="120"><span class="unit">V</span></div></div>
+			<div><label for="target">Max voltage drop <sup>6</sup></label>
+				<div class="field"><input id="target" type="number" min="0.1" max="50" step="0.1" value="3"><span class="unit">%</span></div></div>
+			<div><label class="check"><input id="continuous" type="checkbox" checked> Continuous load (size ampacity at 125%) <sup>11</sup></label></div>
+		</div>
+		<div id="error" class="msg" hidden></div>
+	</section>
+
+	<section class="cards" style="margin-top:16px">
+		<div class="card" id="cardPct"><div class="k">Total drop</div><div class="v" id="outPct">&ndash;</div></div>
+		<div class="card"><div class="k">Total drop (V)</div><div class="v" id="outV">&ndash;</div></div>
+		<div class="card"><div class="k">Voltage at last load</div><div class="v" id="outEnd">&ndash;</div></div>
+		<div class="card"><div class="k">Est. cost <sup>8,9,10</sup></div><div class="v" id="outCost">&ndash;</div></div>
+	</section>
+
+	<section class="panel">
+		<h2>Segments</h2>
+		<div class="table-wrap">
+			<table>
+				<thead><tr>
+					<th>Seg.</th><th>Length</th><th>Load</th><th>Wire size</th>
+					<th>Chosen</th><th>Current (A)</th><th>Ampacity (A) <sup>11</sup></th>
+					<th>Z (&Omega;) <sup>3,5</sup></th><th>Drop (V)</th><th>Voltage (V)</th><th>Cum. drop</th><th></th>
+				</tr></thead>
+				<tbody id="rows"></tbody>
+			</table>
+		</div>
+		<div class="toolbar">
+			<button id="add">+ Add segment</button>
+			<button id="copy">Copy results</button>
+			<button id="print">Print</button>
+			<button id="reset">Reset</button>
+			<span id="copied" class="notes" hidden>Copied as tab-separated text.</span>
+		</div>
+	</section>
+
+	<section class="panel">
+		<h2>Voltage along the string</h2>
+		<div class="chart-wrap"><canvas id="chart"></canvas></div>
+	</section>
+
+	<section class="panel notes">
+		<h2>Notes</h2>
+		<ol>
+			<li>Resistance and reactance from NFPA 70 (NEC) Chapter 9, Table 9, copper conductors in steel conduit.</li>
+			<li>Conduit is assumed metallic (worst-case reactance) with copper conductors.</li>
+			<li>Effective Z = R&middot;PF + X&middot;sin(acos(PF)).</li>
+			<li>Single-phase loads only.</li>
+			<li>Segment length is doubled to include the return conductor.</li>
+			<li>NEC informational notes recommend max 3% on a branch circuit and 5% overall including the feeder.</li>
+			<li>Segment current is the sum of all downstream loads at the source voltage and entered power factor.</li>
+			<li>Material pricing from Southwire market pricing, 11/16/2017. The 3/0 price is interpolated (source value was corrupt).</li>
+			<li>Labor is cable only (no trenching or conduit), 2010 RSMeans.</li>
+			<li>Cost is combined material and labor for both conductors.</li>
+			<li>Ampacity from NEC Table 310.16, 75&deg;C copper, with the small-conductor limits of 240.4(D) (#14: 15 A, #12: 20 A, #10: 30 A). No derating for ambient temperature or conductor fill is applied. With "continuous load" checked, current is multiplied by 1.25 before comparing.</li>
+			<li>"Auto" picks the lowest-cost set of sizes that meets the drop target and ampacity; pick a size to override a segment.</li>
+		</ol>
+		<p><b>Disclaimer:</b> using this tool does not excuse you from exercising sound engineering judgment.</p>
+	</section>
+</main>
+
+<script>
+// One row per conductor size. r/x in ohms per 1000 ft (NEC Ch. 9 Table 9, Cu, steel conduit),
+// price in USD per foot of conductor, amp = NEC 310.16 75°C Cu limited by 240.4(D).
+var WIRES = [
+	{ name: "#14",     r: 3.1,   x: 0.073, price: 0.44119,  amp: 15  },
+	{ name: "#12",     r: 2.0,   x: 0.068, price: 0.56433,  amp: 20  },
+	{ name: "#10",     r: 1.2,   x: 0.063, price: 0.71778,  amp: 30  },
+	{ name: "#8",      r: 0.78,  x: 0.065, price: 1.0153,   amp: 50  },
+	{ name: "#6",      r: 0.49,  x: 0.064, price: 1.3482,   amp: 65  },
+	{ name: "#4",      r: 0.31,  x: 0.060, price: 1.84652,  amp: 85  },
+	{ name: "#3",      r: 0.25,  x: 0.059, price: 2.233,    amp: 100 },
+	{ name: "#2",      r: 0.19,  x: 0.057, price: 2.71629,  amp: 115 },
+	{ name: "#1",      r: 0.15,  x: 0.057, price: 3.28454,  amp: 130 },
+	{ name: "1/0",     r: 0.12,  x: 0.055, price: 3.95684,  amp: 150 },
+	{ name: "2/0",     r: 0.10,  x: 0.054, price: 4.88115,  amp: 175 },
+	// Source value was 49.17441 (corrupt); geometric mean of 2/0 and 4/0 until the real price is confirmed.
+	{ name: "3/0",     r: 0.079, x: 0.052, price: 6.02694,  amp: 200 },
+	{ name: "4/0",     r: 0.063, x: 0.051, price: 7.44161,  amp: 230 },
+	{ name: "250kcmil", r: 0.054, x: 0.052, price: 9.8262,   amp: 255 },
+	{ name: "300kcmil", r: 0.045, x: 0.051, price: 11.81509, amp: 285 },
+	{ name: "350kcmil", r: 0.039, x: 0.050, price: 11.59275, amp: 310 },
+	{ name: "400kcmil", r: 0.035, x: 0.049, price: 13.01753, amp: 335 },
+	{ name: "500kcmil", r: 0.029, x: 0.048, price: 15.74741, amp: 380 },
+	{ name: "600kcmil", r: 0.025, x: 0.048, price: 20.07146, amp: 420 },
+	{ name: "750kcmil", r: 0.021, x: 0.048, price: 31.587,   amp: 475 },
+	{ name: "1000kcmil", r: 0.018, x: 0.046, price: 41.609,  amp: 545 }
+];
+
+var STORAGE_KEY = "voltagedrop.v2";
+var DEFAULT_SEGMENTS = [
+	{ len: 100, load: 500, size: "auto" },
+	{ len: 100, load: 500, size: "auto" },
+	{ len: 100, load: 500, size: "auto" },
+	{ len: 100, load: 500, size: "auto" }
+];
+
+var $ = function (id) { return document.getElementById(id); };
+var rowsEl = $("rows");
+var chart = null;
+
+function sizeOptions(selected) {
+	var html = '<option value="auto"' + (selected === "auto" ? " selected" : "") + '>Auto</option>';
+	WIRES.forEach(function (w, i) {
+		html += '<option value="' + i + '"' + (String(selected) === String(i) ? " selected" : "") + '>' + w.name + '</option>';
+	});
+	return html;
+}
+
+function addRow(seg) {
+	var tr = document.createElement("tr");
+	tr.innerHTML =
+		'<td class="idx"></td>' +
+		'<td><div class="field"><input class="len" type="number" min="0" step="1" value="' + (seg.len !== undefined ? seg.len : "") + '"><span class="unit">ft</span></div></td>' +
+		'<td><div class="field"><input class="load" type="number" min="0" step="1" value="' + (seg.load !== undefined ? seg.load : "") + '"><span class="unit">W</span></div></td>' +
+		'<td><div class="field"><select class="size">' + sizeOptions(seg.size || "auto") + '</select></div></td>' +
+		'<td class="size out-size"></td><td class="out-i"></td><td class="out-amp"></td>' +
+		'<td class="out-z"></td><td class="out-drop"></td><td class="out-v"></td><td class="out-pct"></td>' +
+		'<td><button class="x" title="Remove segment">&times;</button></td>';
+	tr.querySelector("button.x").addEventListener("click", function () {
+		if (rowsEl.children.length > 1) { tr.remove(); update(); }
+	});
+	rowsEl.appendChild(tr);
+}
+
+function readState() {
+	return {
+		pf: $("pf").value, volts: $("volts").value, target: $("target").value,
+		continuous: $("continuous").checked,
+		segments: Array.prototype.map.call(rowsEl.children, function (tr) {
+			return { len: tr.querySelector(".len").value, load: tr.querySelector(".load").value, size: tr.querySelector(".size").value };
+		})
+	};
+}
+
+function loadState(s) {
+	$("pf").value = s.pf; $("volts").value = s.volts; $("target").value = s.target;
+	$("continuous").checked = s.continuous !== false;
+	rowsEl.innerHTML = "";
+	(s.segments && s.segments.length ? s.segments : DEFAULT_SEGMENTS).forEach(addRow);
+}
+
+function save(s) {
+	try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch (e) {}
+}
+
+// Validate inputs; returns { errors, pf, volts, target, segs } with numbers parsed.
+function parse(s) {
+	var errors = [];
+	document.querySelectorAll(".invalid").forEach(function (el) { el.classList.remove("invalid"); });
+	function num(el, v, lo, hi, name, exclusiveLo) {
+		var n = v === "" ? NaN : Number(v);
+		if (!isFinite(n) || (exclusiveLo ? n <= lo : n < lo) || n > hi) {
+			el.closest(".field").classList.add("invalid");
+			errors.push(name);
+			return NaN;
+		}
+		return n;
+	}
+	var pf = num($("pf"), s.pf, 0, 1, "Power factor must be greater than 0 and at most 1", true);
+	var volts = num($("volts"), s.volts, 0, 100000, "Source voltage must be greater than 0", true);
+	var target = num($("target"), s.target, 0, 100, "Max voltage drop must be between 0 and 100%", true);
+	var segs = s.segments.map(function (seg, i) {
+		var tr = rowsEl.children[i];
+		return {
+			len: num(tr.querySelector(".len"), seg.len === "" ? "0" : seg.len, 0, 1e6, "Segment " + (i + 1) + " length must be 0 or more"),
+			load: num(tr.querySelector(".load"), seg.load === "" ? "0" : seg.load, 0, 1e9, "Segment " + (i + 1) + " load must be 0 or more"),
+			fixed: seg.size === "auto" ? null : Number(seg.size)
+		};
+	});
+	return { errors: errors, pf: pf, volts: volts, target: target, segs: segs, continuous: s.continuous };
+}
+
+// Lowest-cost size per segment such that total drop <= budget and every segment meets ampacity.
+// Multiple-choice knapsack, solved by dynamic programming over the drop budget.
+function optimize(segs, pf, budgetV, continuous) {
+	var sinT = Math.sin(Math.acos(pf));
+	var n = segs.length;
+	// Per segment: candidate {w, drop, cost}, dominated options removed, sorted by cost.
+	var cands = segs.map(function (s) {
+		var need = s.current * (continuous ? 1.25 : 1);
+		var idxs = s.fixed !== null ? [s.fixed] : WIRES.map(function (_, i) { return i; });
+		var list = idxs.map(function (i) {
+			var w = WIRES[i], L = s.len * 2;
+			var z = L / 1000 * (w.r * pf + w.x * sinT);
+			return { w: i, z: z, drop: s.current * z, cost: L * w.price, amp: w.amp >= need || s.current === 0 };
+		});
+		if (s.fixed === null) {
+			var ok = list.filter(function (c) { return c.amp; });
+			list = ok.length ? ok : [list[list.length - 1]];
+		}
+		list.sort(function (a, b) { return a.cost - b.cost || a.drop - b.drop; });
+		var kept = [], bestDrop = Infinity;
+		list.forEach(function (c) { if (c.drop < bestDrop - 1e-12) { kept.push(c); bestDrop = c.drop; } });
+		return kept;
+	});
+	var minDrop = cands.reduce(function (a, l) { return a + l[l.length - 1].drop; }, 0);
+	var feasible = minDrop <= budgetV + 1e-12;
+	var best = null;
+	if (feasible) {
+		// DP over the drop budget split into G steps. Each drop is rounded UP to a step, so a
+		// result never exceeds the target; it can cost marginally more than the true optimum.
+		var G = 4000, step = budgetV / G || 1;
+		var cost = new Float64Array(G + 1), choice = [];
+		for (var i = 0; i < n; i++) {
+			var next = new Float64Array(G + 1).fill(Infinity), ch = new Int16Array(G + 1).fill(-1);
+			var steps = cands[i].map(function (c) { return Math.ceil(c.drop / step - 1e-9); });
+			for (var b = 0; b <= G; b++) {
+				for (var k = 0; k < cands[i].length; k++) {
+					if (steps[k] > b) continue;
+					var v = cost[b - steps[k]] + cands[i][k].cost;
+					if (v < next[b]) { next[b] = v; ch[b] = k; }
+				}
+			}
+			cost = next; choice.push({ ch: ch, steps: steps });
+		}
+		if (isFinite(cost[G])) {
+			best = new Array(n);
+			for (var i = n - 1, b = G; i >= 0; i--) {
+				var k = choice[i].ch[b];
+				best[i] = cands[i][k];
+				b -= choice[i].steps[k];
+			}
+		}
+	}
+	// If the target can't be met, report the lowest-drop option so the user sees how close it gets.
+	if (!best) feasible = false;
+	if (!best) best =cands.map(function (l) { return l[l.length - 1]; });
+	return { picks: best, feasible: feasible };
+}
+
+var fmt = function (v, d) { return isFinite(v) ? v.toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d }) : "–"; };
+
+function update() {
+	var s = readState();
+	save(s);
+	var p = parse(s);
+	var err = $("error");
+	Array.prototype.forEach.call(rowsEl.children, function (tr, i) { tr.querySelector(".idx").textContent = i + 1; });
+	if (p.errors.length) {
+		err.hidden = false;
+		err.textContent = p.errors.join(". ") + ".";
+		clearOutputs();
+		return;
+	}
+	err.hidden = true;
+
+	// Current in each segment = all downstream loads.
+	var downstream = 0;
+	for (var i = p.segs.length - 1; i >= 0; i--) {
+		downstream += p.segs[i].load;
+		p.segs[i].current = downstream / p.pf / p.volts;
+	}
+	var budget = p.target / 100 * p.volts;
+	var res = optimize(p.segs, p.pf, budget, p.continuous);
+
+	var v = p.volts, totalDrop = 0, totalCost = 0, labels = ["Source"], data = [p.volts], ampIssue = false;
+	res.picks.forEach(function (c, i) {
+		var tr = rowsEl.children[i], seg = p.segs[i], w = WIRES[c.w];
+		var need = seg.current * (p.continuous ? 1.25 : 1);
+		var active = seg.len > 0 || seg.load > 0;
+		totalDrop += c.drop; totalCost += c.cost; v -= c.drop;
+		var pct = totalDrop / p.volts * 100;
+		var ampOk = seg.current === 0 || w.amp >= need;
+		if (!ampOk) ampIssue = true;
+		tr.querySelector(".out-size").textContent = active ? w.name : "–";
+		tr.querySelector(".out-i").textContent = fmt(seg.current, 2);
+		tr.querySelector(".out-amp").innerHTML = active ? '<span class="pill ' + (ampOk ? "ok" : "bad") + '">' + w.amp + (ampOk ? "" : " &lt; " + fmt(need, 1)) + "</span>" : "–";
+		tr.querySelector(".out-z").textContent = fmt(c.z, 4);
+		tr.querySelector(".out-drop").textContent = fmt(c.drop, 2);
+		tr.querySelector(".out-v").textContent = fmt(v, 2);
+		tr.querySelector(".out-pct").innerHTML = '<span class="pill ' + level(pct, p.target) + '">' + fmt(pct, 2) + "%</span>";
+		labels.push(String(i + 1)); data.push(v);
+	});
+
+	var pctTotal = totalDrop / p.volts * 100;
+	$("outPct").textContent = fmt(pctTotal, 2) + "%";
+	$("cardPct").className = "card " + level(pctTotal, p.target);
+	$("outV").textContent = fmt(totalDrop, 2);
+	$("outEnd").textContent = fmt(v, 1) + " V";
+	$("outCost").textContent = "$" + fmt(totalCost, 0);
+
+	var msgs = [];
+	if (!res.feasible) msgs.push("The " + p.target + "% target can't be met even with the largest conductors that fit these constraints; showing the lowest-drop sizing");
+	if (ampIssue) msgs.push("A manually chosen size is below the required ampacity");
+	if (msgs.length) { err.hidden = false; err.textContent = msgs.join(". ") + "."; }
+
+	drawChart(labels, data, p.volts * (1 - p.target / 100));
+}
+
+function level(pct, target) {
+	return pct > target ? "bad" : pct > target * 0.9 ? "warn" : "ok";
+}
+
+function clearOutputs() {
+	["outPct", "outV", "outEnd", "outCost"].forEach(function (id) { $(id).textContent = "–"; });
+	$("cardPct").className = "card";
+	rowsEl.querySelectorAll("td[class^=out], td.out-size").forEach(function (td) { td.textContent = ""; });
+}
+
+function drawChart(labels, data, limit) {
+	if (typeof Chart === "undefined") return;
+	var css = getComputedStyle(document.documentElement);
+	var accent = css.getPropertyValue("--accent").trim(), bad = css.getPropertyValue("--bad").trim(),
+		muted = css.getPropertyValue("--muted").trim(), line = css.getPropertyValue("--line").trim();
+	var datasets = [
+		{ label: "Voltage", data: data, borderColor: accent, backgroundColor: accent, borderWidth: 2, tension: 0, pointRadius: 3 },
+		{ label: "Target minimum", data: labels.map(function () { return limit; }), borderColor: bad, borderDash: [6, 4], borderWidth: 1.5, pointRadius: 0 }
+	];
+	if (chart) { chart.data.labels = labels; chart.data.datasets = datasets; chart.update("none"); return; }
+	chart = new Chart($("chart"), {
+		type: "line",
+		data: { labels: labels, datasets: datasets },
+		options: {
+			maintainAspectRatio: false, animation: false,
+			plugins: { legend: { labels: { color: muted } },
+				tooltip: { callbacks: { label: function (c) { return c.dataset.label + ": " + c.parsed.y.toFixed(2) + " V"; } } } },
+			scales: {
+				x: { title: { display: true, text: "Segment", color: muted }, ticks: { color: muted }, grid: { color: line } },
+				y: { title: { display: true, text: "Volts", color: muted }, ticks: { color: muted }, grid: { color: line } }
+			}
+		}
+	});
+}
+
+function copyResults() {
+	var head = ["Segment", "Length (ft)", "Load (W)", "Wire", "Current (A)", "Ampacity (A)", "Z (ohm)", "Drop (V)", "Voltage (V)", "Cum. drop (%)"];
+	var lines = [head.join("\t")];
+	Array.prototype.forEach.call(rowsEl.children, function (tr) {
+		lines.push([
+			tr.querySelector(".idx").textContent, tr.querySelector(".len").value, tr.querySelector(".load").value,
+			tr.querySelector(".out-size").textContent, tr.querySelector(".out-i").textContent,
+			tr.querySelector(".out-amp").textContent, tr.querySelector(".out-z").textContent,
+			tr.querySelector(".out-drop").textContent, tr.querySelector(".out-v").textContent,
+			tr.querySelector(".out-pct").textContent
+		].join("\t"));
+	});
+	lines.push("");
+	lines.push("Source " + $("volts").value + " V, PF " + $("pf").value + ", target " + $("target").value + "%");
+	lines.push("Total drop " + $("outPct").textContent + " (" + $("outV").textContent + " V), est. cost " + $("outCost").textContent);
+	var text = lines.join("\n");
+	var done = function () { $("copied").hidden = false; setTimeout(function () { $("copied").hidden = true; }, 2000); };
+	if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function () {});
+}
+
+var saved = null;
+try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch (e) {}
+loadState(saved || { pf: "0.9", volts: "120", target: "3", continuous: true, segments: DEFAULT_SEGMENTS });
+
+document.addEventListener("input", update);
+document.addEventListener("change", update);
+$("add").addEventListener("click", function () { addRow({ len: "", load: "", size: "auto" }); update(); });
+$("copy").addEventListener("click", copyResults);
+$("print").addEventListener("click", function () { window.print(); });
+$("reset").addEventListener("click", function () {
+	loadState({ pf: "0.9", volts: "120", target: "3", continuous: true, segments: DEFAULT_SEGMENTS });
+	update();
+});
+update();
+</script>
+</body>
+</html>
