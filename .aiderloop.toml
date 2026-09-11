@@ -1,9 +1,10 @@
 # Pure HTML/JS, no build step and no test suite -- so the only automated
 # gate is JavaScript syntax over the files each item changes. That is thin,
 # and it is why the real check on this project is reading the diff: the
-# bugs found here so far (a conductor-size key missing #3 and #1, a price
-# of 49.17441 sitting between 4.88 and 7.44) are wrong *data*, which no
-# syntax checker can see.
+# worst bugs found here (a conductor-size key missing #3 and #1, a price of
+# 49.17441 sitting between 4.88 and 7.44) were wrong *data*, which no syntax
+# checker can see. Both are fixed; the wire data now lives in one WIRES table
+# in index.html, so review any edit to it row by row (R, X, price, ampacity).
 
 [model]
 author = "qwen25-coder-aider"

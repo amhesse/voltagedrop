@@ -113,8 +113,16 @@
 			<button id="add">+ Add segment</button>
 			<button id="copy">Copy results</button>
 			<button id="print">Print</button>
+			<button id="share">Copy share link</button>
 			<button id="reset">Reset</button>
-			<span id="copied" class="notes" hidden>Copied as tab-separated text.</span>
+			<span id="flash" class="notes" role="status"></span>
+		</div>
+		<div class="toolbar no-print">
+			<div class="field"><input id="saveName" type="text" placeholder="Calculation name" aria-label="Calculation name"></div>
+			<button id="saveBtn">Save</button>
+			<div class="field"><select id="savedList" aria-label="Saved calculations"></select></div>
+			<button id="loadBtn">Load</button>
+			<button id="deleteBtn">Delete</button>
 		</div>
 	</section>
 
@@ -423,18 +431,85 @@ function copyResults() {
 	lines.push("Source " + $("volts").value + " V, PF " + $("pf").value + ", target " + $("target").value + "%");
 	lines.push("Total drop " + $("outPct").textContent + " (" + $("outV").textContent + " V), est. cost " + $("outCost").textContent);
 	var text = lines.join("\n");
-	var done = function () { $("copied").hidden = false; setTimeout(function () { $("copied").hidden = true; }, 2000); };
-	if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function () {});
+	copyText(text, "Copied as tab-separated text.");
 }
 
-var saved = null;
+function flash(msg) {
+	$("flash").textContent = msg;
+	clearTimeout(flash.t);
+	flash.t = setTimeout(function () { $("flash").textContent = ""; }, 3000);
+}
+
+function copyText(text, msg) {
+	if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { flash(msg); }, function () { flash("Couldn't copy to the clipboard."); });
+	else flash("Clipboard not available in this browser.");
+}
+
+// Share links carry the whole calculation in the URL hash as base64url JSON, so nothing is stored server-side.
+function encodeState(s) {
+	var compact = { p: s.pf, v: s.volts, t: s.target, c: s.continuous ? 1 : 0,
+		s: s.segments.map(function (g) { return [g.len, g.load, g.size]; }) };
+	return btoa(unescape(encodeURIComponent(JSON.stringify(compact)))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function decodeState(str) {
+	try {
+		var c = JSON.parse(decodeURIComponent(escape(atob(str.replace(/-/g, "+").replace(/_/g, "/")))));
+		if (!c || !Array.isArray(c.s)) return null;
+		return { pf: String(c.p), volts: String(c.v), target: String(c.t), continuous: !!c.c,
+			segments: c.s.map(function (g) { return { len: String(g[0]), load: String(g[1]), size: String(g[2]) }; }) };
+	} catch (e) { return null; }
+}
+
+var SAVED_KEY = "voltagedrop.saved";
+function readSaved() {
+	try { return JSON.parse(localStorage.getItem(SAVED_KEY)) || {}; } catch (e) { return {}; }
+}
+function writeSaved(all) {
+	try { localStorage.setItem(SAVED_KEY, JSON.stringify(all)); return true; } catch (e) { return false; }
+}
+function renderSaved(selected) {
+	var names = Object.keys(readSaved()).sort();
+	$("savedList").innerHTML = names.length ? "" : '<option value="">No saved calculations</option>';
+	names.forEach(function (n) {
+		var o = document.createElement("option");
+		o.value = o.textContent = n;
+		if (n === selected) o.selected = true;
+		$("savedList").appendChild(o);
+	});
+}
+
+var saved = null, fromLink = location.hash.length > 1 ? decodeState(location.hash.slice(1)) : null;
 try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch (e) {}
-loadState(saved || { pf: "0.9", volts: "120", target: "3", continuous: true, segments: DEFAULT_SEGMENTS });
+// A shared link wins over the last session; drop the hash so later edits don't leave a stale link in the address bar.
+if (fromLink) history.replaceState(null, "", location.pathname + location.search);
+renderSaved();
+loadState(fromLink || saved || { pf: "0.9", volts: "120", target: "3", continuous: true, segments: DEFAULT_SEGMENTS });
 
 document.addEventListener("input", update);
 document.addEventListener("change", update);
 $("add").addEventListener("click", function () { addRow({ len: "", load: "", size: "auto" }); update(); });
 $("copy").addEventListener("click", copyResults);
+$("share").addEventListener("click", function () {
+	copyText(location.href.split("#")[0] + "#" + encodeState(readState()), "Share link copied.");
+});
+$("saveBtn").addEventListener("click", function () {
+	var name = $("saveName").value.trim();
+	if (!name) { flash("Enter a name to save under."); return; }
+	var all = readSaved(); all[name] = readState();
+	if (!writeSaved(all)) { flash("This browser isn't allowing saved data."); return; }
+	renderSaved(name); flash("Saved \u201c" + name + "\u201d in this browser.");
+});
+$("loadBtn").addEventListener("click", function () {
+	var name = $("savedList").value, s = readSaved()[name];
+	if (!s) return;
+	loadState(s); $("saveName").value = name; update(); flash("Loaded \u201c" + name + "\u201d.");
+});
+$("deleteBtn").addEventListener("click", function () {
+	var name = $("savedList").value, all = readSaved();
+	if (!all[name]) return;
+	delete all[name]; writeSaved(all); renderSaved(); flash("Deleted \u201c" + name + "\u201d.");
+});
 $("print").addEventListener("click", function () { window.print(); });
 $("reset").addEventListener("click", function () {
 	loadState({ pf: "0.9", volts: "120", target: "3", continuous: true, segments: DEFAULT_SEGMENTS });
