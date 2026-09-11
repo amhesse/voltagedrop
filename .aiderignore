@@ -1,0 +1,6 @@
+# Nothing large here today, but these are the usual suspects if generated
+# output or aider's own history ever lands in the tree.
+.aider.chat.history.md
+.aider.input.history
+.aider.tags.cache.v4/
+aider_loop.log

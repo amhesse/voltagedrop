@@ -1,0 +1,17 @@
+# qwen25-coder-aider is a local alias over qwen2.5-coder:14b with num_ctx
+# raised to 32768. Rebuild it with:
+#
+#   printf 'FROM qwen2.5-coder:14b\nPARAMETER num_ctx 32768\nPARAMETER num_predict -1\n' > Modelfile
+#   ollama create qwen25-coder-aider -f Modelfile
+#
+# extra_params.num_ctx is load-bearing, not tuning: aider auto-sizes num_ctx
+# for ollama models as int(prompt_tokens * 1.25) + 8192 whenever it isn't
+# already set, and that per-request value overrides the Modelfile. The +8192
+# is the entire output budget, which is fine for diff format and dangerous
+# for `whole`, where the model re-emits the whole file and aider writes back
+# whatever it got -- a truncated generation becomes a truncated file.
+- name: ollama/qwen25-coder-aider
+  edit_format: whole
+  weak_model_name: ollama/qwen25-coder-aider
+  extra_params:
+    num_ctx: 32768

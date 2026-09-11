@@ -1,0 +1,6 @@
+# Repo-local aider config so an automated run doesn't silently depend on
+# whatever ~/.aider.conf.yml happens to say on a given machine.
+model: ollama/qwen25-coder-aider
+edit-format: whole
+auto-commits: true
+map-tokens: 8192
