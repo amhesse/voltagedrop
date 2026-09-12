@@ -8,7 +8,7 @@
   '<td><button class="x" title="Remove segment">&times;</button></td>';
   ```
 
-- [ ] In `index.html`, immediately after the `addRow` function definition, add the following event listener for the duplicate button:
+- [x] In `index.html`, immediately after the `addRow` function definition, add the following event listener for the duplicate button:
   ```javascript
   tr.querySelector("button.duplicate").addEventListener("click", function () {
       var seg = {
