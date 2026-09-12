@@ -208,7 +208,7 @@ function addRow(seg) {
 		'<td><div class="field"><select class="size">' + sizeOptions(seg.size || "auto") + '</select></div></td>' +
 		'<td class="size out-size"></td><td class="out-i"></td><td class="out-amp"></td>' +
 		'<td class="out-z"></td><td class="out-drop"></td><td class="out-v"></td><td class="out-pct"></td>' +
-		'<td><button class="x" title="Remove segment">&times;</button></td>';
+		'<td><button class="duplicate" title="Duplicate segment">Duplicate</button><button class="x" title="Remove segment">&times;</button></td>';
 	tr.querySelector("button.x").addEventListener("click", function () {
 		if (rowsEl.children.length > 1) { tr.remove(); update(); }
 	});
