@@ -212,6 +212,16 @@ function addRow(seg) {
 	tr.querySelector("button.x").addEventListener("click", function () {
 		if (rowsEl.children.length > 1) { tr.remove(); update(); }
 	});
+	// Add event listener for the duplicate button
+	tr.querySelector("button.duplicate").addEventListener("click", function () {
+		var seg = {
+			len: tr.querySelector(".len").value,
+			load: tr.querySelector(".load").value,
+			size: tr.querySelector(".size").value
+		};
+		addRow(seg);
+		update();
+	});
 	rowsEl.appendChild(tr);
 }
 
