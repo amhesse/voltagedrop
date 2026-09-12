@@ -8,7 +8,12 @@
 
 [model]
 author = "qwen25-coder-aider"
-review = "qwen2.5-coder:7b"
+# index.html uses tabs. The loop's own default is diff (SEARCH/REPLACE),
+# which is brittle to exactly that: a real item here failed with "SEARCH
+# block failed to exactly match" because the model's block used spaces.
+# whole matches this project's own .aider.conf.yml, which already set
+# edit-format: whole before the loop existed.
+edit_format = "whole"
 
 [validate]
 checks = ["js-html"]

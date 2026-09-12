@@ -1,5 +1,5 @@
 
-- [ ] In `index.html`, in the `addRow` function, insert the following HTML snippet right before the `<button class="x">` closing tag:
+- [x] In `index.html`, in the `addRow` function, insert the following HTML snippet right before the `<button class="x">` closing tag:
   ```html
   <button class="duplicate" title="Duplicate segment">Duplicate</button>
   ```
